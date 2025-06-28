@@ -3,7 +3,7 @@ import whisper
 from deep_translator import GoogleTranslator
 import tempfile
 import os
-from subtitle_generator import get_font_for_text, export_srt, render_subtitles_on_video
+from subtitle_generator import get_font_for_text, export_srt, burn_subtitles_with_ffmpeg
 
 # Initialize session state variables
 if 'users' not in st.session_state:
@@ -119,11 +119,8 @@ def main_page():
                 srt_path = os.path.join('output', srt_filename)
                 export_srt(translated_segments, srt_path)
 
-                sample_text = translated_segments[0]['text'] if translated_segments else ''
-                font_path = get_font_for_text(sample_text)
-
                 video_output_path = os.path.join('output', video_filename)
-                render_subtitles_on_video(temp_file.name, translated_segments, video_output_path, font_path)
+                burn_subtitles_with_ffmpeg(temp_file.name, srt_path, video_output_path)
 
                 st.success("Subtitle generation complete!")
 
@@ -131,7 +128,7 @@ def main_page():
                     st.download_button("Download Subtitle (.srt)", file, srt_filename)
 
                 with open(video_output_path, "rb") as file:
-                    st.download_button("Download Subtitled Video (.mp4)", file, video_filename)
+                    st.download_button("Download Subtitled Video", file, video_filename)
         else:
             st.error("Please upload a file first.")
 
